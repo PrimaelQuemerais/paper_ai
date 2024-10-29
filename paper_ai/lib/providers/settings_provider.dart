@@ -7,7 +7,7 @@ final settingsProvider =
   return SettingsNotifier();
 });
 
-enum ModelProvider { gemini, openai, claude }
+enum ModelProvider { gemini, openai, claude, koboldcpp }
 
 class Model {
   final String name;
@@ -31,6 +31,8 @@ class SettingsState {
   final String openaiApiKey;
   final String claudeApiKey;
   final int messageCount;
+  final String customEndpoint;
+  final String customModelName;
   final Model? selectedModel;
 
   SettingsState({
@@ -38,6 +40,8 @@ class SettingsState {
     required this.openaiApiKey,
     required this.claudeApiKey,
     required this.messageCount,
+    required this.customEndpoint,
+    required this.customModelName,
     this.selectedModel,
   });
 
@@ -46,6 +50,8 @@ class SettingsState {
     String? openaiApiKey,
     String? claudeApiKey,
     int? messageCount,
+    String? customEndpoint,
+    String? customModelName,
     Model? selectedModel,
   }) {
     return SettingsState(
@@ -53,6 +59,8 @@ class SettingsState {
       openaiApiKey: openaiApiKey ?? this.openaiApiKey,
       claudeApiKey: claudeApiKey ?? this.claudeApiKey,
       messageCount: messageCount ?? this.messageCount,
+      customEndpoint: customEndpoint ?? this.customEndpoint,
+      customModelName: customModelName ?? this.customModelName,
       selectedModel: selectedModel ?? this.selectedModel,
     );
   }
@@ -79,6 +87,14 @@ class SettingsState {
         Model(name: 'claude-3-opus-latest', provider: ModelProvider.claude),
       ]);
     }
+    if (customEndpoint.isNotEmpty) {
+      models.add(
+        Model(
+          name: customModelName,
+          provider: ModelProvider.koboldcpp,
+        ),
+      );
+    }
 
     return models;
   }
@@ -92,12 +108,16 @@ class SettingsState {
 
 class SettingsNotifier extends StateNotifier<SettingsState> {
   SettingsNotifier()
-      : super(SettingsState(
-          geminiApiKey: '',
-          openaiApiKey: '',
-          claudeApiKey: '',
-          messageCount: 5,
-        )) {
+      : super(
+          SettingsState(
+            geminiApiKey: '',
+            openaiApiKey: '',
+            claudeApiKey: '',
+            messageCount: 5,
+            customEndpoint: '',
+            customModelName: 'my-model',
+          ),
+        ) {
     loadSettings();
   }
 
@@ -108,6 +128,8 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       openaiApiKey: prefs.getString('openaiApiKey') ?? '',
       claudeApiKey: prefs.getString('claudeApiKey') ?? '',
       messageCount: prefs.getInt('messageCount') ?? 5,
+      customEndpoint: prefs.getString('customEndpoint') ?? '',
+      customModelName: prefs.getString('customModelName') ?? 'my-model',
     );
 
     if (state.selectedModel == null) {
@@ -128,6 +150,8 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     await prefs.setString('openaiApiKey', state.openaiApiKey);
     await prefs.setString('claudeApiKey', state.claudeApiKey);
     await prefs.setInt('messageCount', state.messageCount);
+    await prefs.setString('customEndpoint', state.customEndpoint);
+    await prefs.setString('customModelName', state.customModelName);
 
     loadSettings();
   }
@@ -146,6 +170,14 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
 
   void updateMessageCount(int count) {
     state = state.copyWith(messageCount: count);
+  }
+
+  void updateCustomEndpoint(String endpoint) {
+    state = state.copyWith(customEndpoint: endpoint);
+  }
+
+  void updateCustomModelName(String name) {
+    state = state.copyWith(customModelName: name);
   }
 
   void updateSelectedModel(Model model) async {

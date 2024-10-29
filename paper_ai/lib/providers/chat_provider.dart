@@ -78,6 +78,10 @@ class ChatNotifier extends StateNotifier<ChatState> {
             model: settings.selectedModel!.name,
           ),
         );
+      case ModelProvider.koboldcpp:
+        return ChatOpenAI(
+          baseUrl: settings.customEndpoint,
+        );
     }
   }
 

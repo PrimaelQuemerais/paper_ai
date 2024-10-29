@@ -21,6 +21,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _isOpenaiApiKeyVisible = false;
   bool _isClaudeApiKeyVisible = false;
 
+  final TextEditingController _customEndpointController =
+      TextEditingController();
+  final TextEditingController _customModelNameController =
+      TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -35,6 +40,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _openaiApiKeyController.text = settings.openaiApiKey;
       _claudeApiKeyController.text = settings.claudeApiKey;
       _messageCount = settings.messageCount;
+      _customEndpointController.text = settings.customEndpoint;
+      _customModelNameController.text = settings.customModelName;
     });
   }
 
@@ -49,6 +56,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         .read(settingsProvider.notifier)
         .updateClaudeApiKey(_claudeApiKeyController.text);
     ref.read(settingsProvider.notifier).updateMessageCount(_messageCount);
+    ref.read(settingsProvider.notifier).updateCustomEndpoint(
+          _customEndpointController.text,
+        );
+    ref.read(settingsProvider.notifier).updateCustomModelName(
+          _customModelNameController.text,
+        );
     await ref.read(settingsProvider.notifier).saveSettings();
 
     if (mounted) {
@@ -155,7 +168,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             const Divider(),
             Row(
               children: [
@@ -179,6 +192,38 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               onValueChanged: (newValue) {
                 _messageCount = newValue;
               },
+            ),
+            const SizedBox(height: 24),
+            const Divider(),
+            Row(
+              children: [
+                Text(
+                  'Custom OpenAI API endpoint',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Text(
+                  'This URL is used to connect to an OpenAI compatible API',
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _customEndpointController,
+              decoration: const InputDecoration(
+                labelText: 'Custom endpoint (e.g. https://api.myserver.com/v1/)',
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _customModelNameController,
+              decoration: const InputDecoration(
+                labelText: 'Custom model name',
+              ),
             ),
             const Spacer(),
             PaperButton(text: 'Save', onPressed: _saveSettings),
