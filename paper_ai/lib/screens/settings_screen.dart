@@ -17,6 +17,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final TextEditingController _claudeApiKeyController = TextEditingController();
   int _messageCount = 5;
 
+  bool _isGeminiApiKeyVisible = false;
+  bool _isOpenaiApiKeyVisible = false;
+  bool _isClaudeApiKeyVisible = false;
+
   @override
   void initState() {
     super.initState();
@@ -71,25 +75,85 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ],
             ),
-            TextField(
-              controller: _geminiApiKeyController,
-              decoration: const InputDecoration(
-                labelText: 'Gemini API Key',
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _geminiApiKeyController,
+                    decoration: const InputDecoration(
+                      labelText: 'Gemini API Key',
+                    ),
+                    obscureText: !_isGeminiApiKeyVisible,
+                  ),
+                ),
+                const SizedBox(width: 24),
+                IconButton(
+                  icon: Icon(
+                    _isGeminiApiKeyVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isGeminiApiKeyVisible = !_isGeminiApiKeyVisible;
+                    });
+                  },
+                ),
+              ],
             ),
             const SizedBox(height: 16),
-            TextField(
-              controller: _openaiApiKeyController,
-              decoration: const InputDecoration(
-                labelText: 'OpenAI API Key',
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _openaiApiKeyController,
+                    decoration: const InputDecoration(
+                      labelText: 'OpenAI API Key',
+                    ),
+                    obscureText: !_isOpenaiApiKeyVisible,
+                  ),
+                ),
+                const SizedBox(width: 24),
+                IconButton(
+                  icon: Icon(
+                    _isOpenaiApiKeyVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isOpenaiApiKeyVisible = !_isOpenaiApiKeyVisible;
+                    });
+                  },
+                ),
+              ],
             ),
             const SizedBox(height: 16),
-            TextField(
-              controller: _claudeApiKeyController,
-              decoration: const InputDecoration(
-                labelText: 'Claude API Key',
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _claudeApiKeyController,
+                    decoration: const InputDecoration(
+                      labelText: 'Claude API Key',
+                    ),
+                    obscureText: !_isClaudeApiKeyVisible,
+                  ),
+                ),
+                const SizedBox(width: 24),
+                IconButton(
+                  icon: Icon(
+                    _isClaudeApiKeyVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isClaudeApiKeyVisible = !_isClaudeApiKeyVisible;
+                    });
+                  },
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             const Divider(),

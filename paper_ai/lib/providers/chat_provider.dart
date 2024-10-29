@@ -8,6 +8,7 @@ import 'package:paper_ai/providers/settings_provider.dart';
 import 'package:paper_ai/database/db_helper.dart';
 import 'package:langchain/langchain.dart';
 import 'package:langchain_google/langchain_google.dart';
+import 'package:paper_ai/widgets/paper_button.dart';
 
 final chatProvider = StateNotifierProvider<ChatNotifier, ChatState>((ref) {
   return ChatNotifier();
@@ -117,7 +118,11 @@ class ChatNotifier extends StateNotifier<ChatState> {
     );
   }
 
-  Future<void> sendMessage(String userMessage, SettingsState settings) async {
+  Future<void> sendMessage(
+    BuildContext context,
+    String userMessage,
+    SettingsState settings,
+  ) async {
     if (userMessage.isEmpty) {
       return;
     }
@@ -157,11 +162,24 @@ class ChatNotifier extends StateNotifier<ChatState> {
       );
       final result = await getClient(settings)?.invoke(prompt);
       answer = result?.output.content;
-    } catch (e, s) {
-      debugPrint('Failed to generate response: $e\n$s');
+    } catch (error, stacktrace) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Failed to generate response'),
+            action: SnackBarAction(
+              label: 'Show error',
+              onPressed: () {
+                _showErrorDialog(context, error, stacktrace);
+              },
+            ),
+          ),
+        );
+      }
+      debugPrint('Failed to generate response: $error\n$stacktrace');
     }
 
-    if (answer == null) {
+    if (answer == null || answer.isEmpty) {
       state = state.copyWith(
         messages: state.messages
           ..removeLast()
@@ -178,6 +196,41 @@ class ChatNotifier extends StateNotifier<ChatState> {
     );
 
     await _dbHelper.insertMessage(state.currentConversationId!, 'AI', answer);
+  }
+
+  void _showErrorDialog(
+      BuildContext context, dynamic error, dynamic stacktrace) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(0),
+          ),
+          titlePadding: const EdgeInsets.all(12),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+          actionsPadding: const EdgeInsets.all(12),
+          title: const Text('Error'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Error: $error'),
+                const SizedBox(height: 10),
+                Text('Stacktrace: $stacktrace'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            PaperButton(
+              text: 'Close',
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   List<Map<String, String>> _getLastMessages(int count) {

@@ -149,6 +149,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     String input = _controller.text;
                     _controller.clear();
                     await ref.read(chatProvider.notifier).sendMessage(
+                          context,
                           input,
                           settingsState,
                         );
